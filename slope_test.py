@@ -82,6 +82,9 @@ def slope_func(pad ,z1, z2, z3, num):
 
     slope = (abs((np.pi/2 - np.arccos(normal_vec2_length/normal_vec3_length)) * 180.0 / np.pi))
 
+    if slope >30:
+        slope = 0
+
     return slope
 
 
@@ -95,7 +98,7 @@ def main():
 
     # ## Padding
     scale = 1.0
-    k = 45
+    k = 90
     erosion_k = k//2
 
     kernel = np.ones((k,k))/(k*k)
@@ -123,26 +126,46 @@ def main():
     # # ax.view_init(30, 30)
     # plt.show()
 
+# z = blur
+    height, width = blur.shape
+
+    for x in range(height):
+        for y in range(width):
+            # print(blur[x][y])
+            blur[x][y] = blur[x][y]  - int(50 - x * 40/350)
+            if (blur[x][y] > 50):
+                blur[x][y] = 0
+        print(blur[x][y])
+        # print(blur[x][y])
+    z = blur
+
+    
+    grid_size = 10
+    x = np.linspace(0, 1, grid_size)
+    y = np.linspace(0, 1, grid_size)
+    # z = np.linspace(0, 1, grid_size)
+
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-
-    height, width = output.shape
+    
+    ax.set_box_aspect([1, 0.5, 0.05])
 
     x = np.arange(0, width, 1)
     y = np.arange(0, height, 1)
     x, y = np.meshgrid(x, y)
-    z = output
+    
 
     ax.plot_surface(x, y, z, cmap='gray')
-    
+
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Gray Value')
-    
+
     ax.set_xlim(0, width)
     ax.set_ylim(0, height)
     ax.set_zlim(0, np.max(z))
-    
+
     plt.show()
 
 

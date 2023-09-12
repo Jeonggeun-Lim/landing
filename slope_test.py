@@ -48,7 +48,7 @@ def convolve(image, kernel, scale):
             # image_decreased_2[y//2-pad,x//2-pad] = slope
             # image_decreased_2[int((y-pad)//2-pad//2),int((x-pad)//2-pad//2)] = slope
 
-        print('slope: ',  y-pad, '/', iH, slope)
+        print('slope: ',  x-pad, y-pad, '/', iH, slope)
 
     # print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
 
@@ -89,75 +89,83 @@ def slope_func(pad ,z1, z2, z3, num):
 
 
 def main():
-    vor_image_gray = cv2.imread('landing_experiment_20230901/voro_lidar_img_2021_07_21_19_07_26_15400.jpg', 0).astype(np.uint8)   # 3.51m
+    vor_image_gray = cv2.imread('landing_experiment_20230901/voro_lidar_img_2021_07_21_19_04_52_12900.jpg', 0).astype(np.uint8)   # 3.51m
+    # vor_image_gray = cv2.imread('landing_experiment_20230901/voro_lidar_img_2021_07_21_19_07_26_15400.jpg', 0).astype(np.uint8)   # 3.51m
     # cv2.imshow('vor_image', vor_image_gray/255)
 
     ## GaussianBlur
     blur = cv2.GaussianBlur(vor_image_gray,(15,15),0)
-    cv2.imshow('blur', blur/255)
+    # cv2.imshow('blur', blur/255)
 
-    # ## Padding
-    scale = 1.0
-    k = 90
-    erosion_k = k//2
-
-    kernel = np.ones((k,k))/(k*k)
-    kernel_erosion = np.ones((erosion_k,erosion_k))/(erosion_k*erosion_k)
-    output, image_bor = convolve(vor_image_gray, kernel, scale)
-
-    # dist_transform = cv2.distanceTransform(blur, cv2.DIST_L2, 5)  
-
-    # # dist_transform  함수를 사용하면 실수 타입(float32)의 이미지가 생성됩니다. 화면에 보여주려면 normalize 함수를 사용해야 합니다. 
-    # result = cv2.normalize(dist_transform, None, 255, 0, cv2.NORM_MINMAX, cv2.CV_8UC1)
-    # # cv2.imshow("dist_transform", result)
-
-
-    ## Gray to 3D
-    # https://discourse.matplotlib.org/t/surface-plot-interactive-chart-is-very-slow/21332/3
-    # cv2.imwrite('output.jpg', output)
-
-    # x, y = np.mgrid[0:blur.shape[0], 0:blur.shape[1]]
-    # fig = plt.figure(figsize=(11, 11))
-    # ax = fig.gca(projection='3d')
-    # # ax.plot_wireframe(x, y, blur, rstride=10, cstride=10, cmap=plt.cm.gray, linewidth=1)
-    # ax.set_box_aspect([1, 1, 1])  # x, y, z 축 스케일을 동일하게 설정
-    # ax.plot_surface(x, y, blur, rstride=10, cstride=10, cmap=plt.cm.gray, linewidth=1)
-    # ax.view_init(30, -20)
-    # # ax.view_init(30, 30)
-    # plt.show()
-
-# z = blur
     height, width = blur.shape
 
+    # for x in range(height):
+    #     for y in range(width):
+    #         # print(blur[x][y])
+    #         blur[x][y] = blur[x][y]  - int(25 - x * 25/350)
+    #         if (blur[x][y] > 150):
+    #             blur[x][y] = 0
+    #         if y >= 380 and y < 381:  # 30 deg
+    #         # if y >= 300 and y < 301:  # 20 deg
+    #         # if y >= 200 and y < 201:  # 10 deg
+    #             print(blur[x][y])
+    #     # print(blur[x][y])
+    # z = blur
+    
     for x in range(height):
         for y in range(width):
             # print(blur[x][y])
-            blur[x][y] = blur[x][y]  - int(50 - x * 40/350)
-            if (blur[x][y] > 50):
+            blur[x][y] = blur[x][y]  - int(25 - x * 25/350)
+            if (blur[x][y] > 150):
                 blur[x][y] = 0
-        print(blur[x][y])
+            if y >= 380 and y < 381:  # 30 deg
+            # if y >= 300 and y < 301:  # 20 deg
+            # if y >= 200 and y < 201:  # 10 deg
+                print(blur[x][y])
         # print(blur[x][y])
     z = blur
 
+
+    # ## Padding
+    # scale = 1.0
+    # k = 90
+    # erosion_k = k//2
+
+    # kernel = np.ones((k,k))/(k*k)
+    # kernel_erosion = np.ones((erosion_k,erosion_k))/(erosion_k*erosion_k)
+    # output, image_bor = convolve(vor_image_gray, kernel, scale)
+
+    # # 1. 30 deg
+    # blur_subset = blur[130:230, :]  # y, x
+    # height, width = blur_subset.shape
+    # z = blur_subset
     
-    grid_size = 10
-    x = np.linspace(0, 1, grid_size)
-    y = np.linspace(0, 1, grid_size)
-    # z = np.linspace(0, 1, grid_size)
+    # # 2. 20 deg
+    # blur_subset = blur[150:190, :]  # y, x
+    # height, width = blur_subset.shape
+    # z = blur_subset
+    
+    # # 1. 10 deg
+    # blur_subset = blur[150:190, :]  # y, x
+    # height, width = blur_subset.shape
+    # z = blur_subset
 
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    
-    ax.set_box_aspect([1, 0.5, 0.05])
+    # ax.set_box_aspect([1, 0.5, 0.05])
 
+
+    # x = np.arange(380, 381, 1) # 30 deg
+    # x = np.arange(300, 301, 1) # 20 deg
+    # x = np.arange(200, 201, 1) # 10 deg
     x = np.arange(0, width, 1)
     y = np.arange(0, height, 1)
     x, y = np.meshgrid(x, y)
-    
+
+    # np.savetxt('slope.txt', blur[1][y], fmt='%d', delimiter='/t')
 
     ax.plot_surface(x, y, z, cmap='gray')
-
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Gray Value')
@@ -167,13 +175,6 @@ def main():
     ax.set_zlim(0, np.max(z))
 
     plt.show()
-
-
-
-    # ax.plot(x, y, blur)
-    # ax.set_box_aspect([1, 1, 1])  # x, y, z 축 스케일을 동일하게 설정
-
-    # plt.show()
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()

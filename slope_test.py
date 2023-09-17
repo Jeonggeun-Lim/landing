@@ -25,24 +25,27 @@ def convolve(image, kernel, scale):
     (iH, iW) = image_decreased.shape[:2]
     (kH, kW) = kernel.shape[:2]
     pad = (kW - 1) // 2
-    image = cv2.copyMakeBorder(image_decreased, pad, pad, pad, pad, cv2.BORDER_REPLICATE)
-    image_bor = cv2.copyMakeBorder(image_decreased, pad, pad, pad, pad, cv2.BORDER_REPLICATE)
-    print('image.shape: ', image.shape)
-    print('image_bor.shape: ', image_bor.shape)
-
+    
+    # ave_filter_size = (105, 105)
+    # ave_filter_kernel = np.ones(ave_filter_size, dtype=np.float32) / (ave_filter_size[0] * ave_filter_size[1])
+    # image = cv2.filter2D(image, -1, ave_filter_kernel)
+    
+    # image = cv2.GaussianBlur(image, (175,175), 0)
+    
+    image = cv2.copyMakeBorder(image_decreased_2, pad, pad, pad, pad, cv2.BORDER_REPLICATE)
     output = np.zeros((iH, iW), dtype="float32")
     # start = time.time()  # 시작 시간 저장
 
     for y in np.arange(pad, iH + pad, stride):
         for x in np.arange(pad, iW + pad, stride):
 
-            slope1 = slope_func(pad ,image[y-pad,x    ],image[y+pad,x-pad],image[y+pad,x+pad], 1)
-            slope2 = slope_func(pad ,image[y-pad,x-pad],image[y    ,x-pad],image[y+pad,x-pad], 2)
-            slope3 = slope_func(pad ,image[y-pad,x-pad],image[y-pad,x+pad],image[y+pad,x    ], 3)
-            slope4 = slope_func(pad ,image[y-pad,x+pad],image[y    ,x-pad],image[y+pad,x+pad], 4)
+            slope = slope_func(pad ,image[y-pad,x    ],image[y+pad,x-pad],image[y+pad,x+pad], 1)
+            # slope2 = slope_func(pad ,image[y-pad,x-pad],image[y    ,x-pad],image[y+pad,x-pad], 2)
+            # slope3 = slope_func(pad ,image[y-pad,x-pad],image[y-pad,x+pad],image[y+pad,x    ], 3)
+            # slope4 = slope_func(pad ,image[y-pad,x+pad],image[y    ,x-pad],image[y+pad,x+pad], 4)
 
-            # slope = int((slope1+slope2)/2)
-            slope = int((slope1+slope2+slope3+slope4)/4)
+            # slope = int((slope1+slope3)/2)
+            # slope = int((slope1+slope2+slope3+slope4)/4)
             image_decreased_2[(y-pad)//stride-1, (x-pad)//stride - 1] = slope
 
             # image_decreased_2[y//2-pad,x//2-pad] = slope
@@ -56,7 +59,7 @@ def convolve(image, kernel, scale):
     # output = (image_decreased_2 * 255/90).astype("uint8")
     image_increased = cv2.resize(output, dsize=(img_w,img_h), interpolation=cv2.INTER_AREA)
 
-    return image_increased, image_bor
+    return image_increased
 
 def slope_func(pad ,z1, z2, z3, num):
 
@@ -82,96 +85,95 @@ def slope_func(pad ,z1, z2, z3, num):
 
     slope = (abs((np.pi/2 - np.arccos(normal_vec2_length/normal_vec3_length)) * 180.0 / np.pi))
 
-    if slope >30:
+    if slope > 70:
         slope = 0
 
     return slope
 
+def correct_image(blur, slope_range):
+    height, width = blur[0:slope_range, :].shape  # y, x
+    blur = blur[0:slope_range, :]
 
-def main():
-    vor_image_gray = cv2.imread('landing_experiment_20230901/voro_lidar_img_2021_07_21_19_04_52_12900.jpg', 0).astype(np.uint8)   # 3.51m
-    # vor_image_gray = cv2.imread('landing_experiment_20230901/voro_lidar_img_2021_07_21_19_07_26_15400.jpg', 0).astype(np.uint8)   # 3.51m
-    # cv2.imshow('vor_image', vor_image_gray/255)
-
-    ## GaussianBlur
-    blur = cv2.GaussianBlur(vor_image_gray,(15,15),0)
-    # cv2.imshow('blur', blur/255)
-
-    height, width = blur.shape
-
-    # for x in range(height):
-    #     for y in range(width):
-    #         # print(blur[x][y])
-    #         blur[x][y] = blur[x][y]  - int(25 - x * 25/350)
-    #         if (blur[x][y] > 150):
-    #             blur[x][y] = 0
-    #         if y >= 380 and y < 381:  # 30 deg
-    #         # if y >= 300 and y < 301:  # 20 deg
-    #         # if y >= 200 and y < 201:  # 10 deg
-    #             print(blur[x][y])
-    #     # print(blur[x][y])
-    # z = blur
-    
     for x in range(height):
         for y in range(width):
-            # print(blur[x][y])
-            blur[x][y] = blur[x][y]  - int(25 - x * 25/350)
+            # blur[x][y] = blur[x][y]  - int(25 - x * 25/350)
             if (blur[x][y] > 150):
                 blur[x][y] = 0
-            if y >= 380 and y < 381:  # 30 deg
-            # if y >= 300 and y < 301:  # 20 deg
-            # if y >= 200 and y < 201:  # 10 deg
                 print(blur[x][y])
-        # print(blur[x][y])
-    z = blur
 
+    return blur
 
-    # ## Padding
-    # scale = 1.0
-    # k = 90
-    # erosion_k = k//2
+def estimate_slope(z):
+    ## Padding
+    scale = 1.0
+    k = 15
+    erosion_k = k//2
 
-    # kernel = np.ones((k,k))/(k*k)
-    # kernel_erosion = np.ones((erosion_k,erosion_k))/(erosion_k*erosion_k)
-    # output, image_bor = convolve(vor_image_gray, kernel, scale)
-
-    # # 1. 30 deg
-    # blur_subset = blur[130:230, :]  # y, x
-    # height, width = blur_subset.shape
-    # z = blur_subset
+    kernel = np.ones((k,k))/(k*k)
+    kernel_erosion = np.ones((erosion_k,erosion_k))/(erosion_k*erosion_k)
+    output = convolve(z, kernel, scale)
     
-    # # 2. 20 deg
-    # blur_subset = blur[150:190, :]  # y, x
-    # height, width = blur_subset.shape
-    # z = blur_subset
-    
-    # # 1. 10 deg
-    # blur_subset = blur[150:190, :]  # y, x
-    # height, width = blur_subset.shape
-    # z = blur_subset
+    total_pixel_value = 0
+    # for y in range(img_h):
+    #     for x in range(img_w):
+    #         total_pixel_value += output[y, x]
 
+    for y in range(img_h):
+        total_pixel_value += output[y, 50]
+        print(output[y, 50])
+
+    print("ave: ", total_pixel_value, total_pixel_value / (img_h))
+    
+    return output
+
+def main():
+    
+    # vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
+    # slope_range = img_h   # 10 deg
+    # vor_image_gray = cv2.imread('images_20/voro_lidar_img_2023_09_16_06_54_29_02000.jpg', 0).astype(np.uint8)   # 20 deg
+    # slope_range = img_h   # 20 deg
+    vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
+    # vor_image_gray = cv2.imread('output.jpg', 0).astype(np.uint8)   # 30 deg
+    slope_range = img_h   # 30 deg
+    
+    # for y in range(img_h):
+    #     vor_image_gray[y, :] = vor_image_gray[y, 300]
+    
+    blur = cv2.GaussianBlur(vor_image_gray, (45,45), 0)
+    z = correct_image(blur, slope_range)
+    # z = blur
+    z = cv2.resize(z, dsize=(img_w,img_h), interpolation=cv2.INTER_AREA)
+    
+    # img_h = slope_range
+    # z = cv2.resize(z, dsize=(img_w,img_h), interpolation=cv2.INTER_AREA)
+    z = estimate_slope(z)
+
+
+    # z = blur
+    
+    # z = output
+
+
+    # z = cv2.blur(output,(101,101),0)s
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     # ax.set_box_aspect([1, 0.5, 0.05])
 
-
-    # x = np.arange(380, 381, 1) # 30 deg
-    # x = np.arange(300, 301, 1) # 20 deg
-    # x = np.arange(200, 201, 1) # 10 deg
-    x = np.arange(0, width, 1)
-    y = np.arange(0, height, 1)
+    x = np.arange(0, img_w, 1)
+    y = np.arange(0, img_h, 1)
     x, y = np.meshgrid(x, y)
 
     # np.savetxt('slope.txt', blur[1][y], fmt='%d', delimiter='/t')
+    # z = cv2.GaussianBlur(vor_image_gray,(15,15),0)
 
     ax.plot_surface(x, y, z, cmap='gray')
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Gray Value')
 
-    ax.set_xlim(0, width)
-    ax.set_ylim(0, height)
+    ax.set_xlim(0, img_w)
+    ax.set_ylim(0, img_h)
     ax.set_zlim(0, np.max(z))
 
     plt.show()

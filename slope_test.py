@@ -106,7 +106,7 @@ def correct_image(blur, slope_range):
 def estimate_slope(z):
     ## Padding
     scale = 1.0
-    k = 15
+    k = 45
     erosion_k = k//2
 
     kernel = np.ones((k,k))/(k*k)
@@ -130,7 +130,7 @@ def estimate_slope(z):
 def main():
     
     vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
-    # slope_range = (50, 230)   # 10 deg
+    slope_range = (50, 230)   # 10 deg
     # vor_image_gray = cv2.imread('images_20/voro_lidar_img_2023_09_16_06_54_29_02000.jpg', 0).astype(np.uint8)   # 20 deg
     # slope_range = (0, 200)   # 20 deg
     # vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
@@ -146,8 +146,12 @@ def main():
     
     blur = cv2.GaussianBlur(vor_image_gray, (45,45), 0)
     z = correct_image(blur, slope_range)
-    # z = estimate_slope(z)
-    z = cv2.GaussianBlur(z, (45,45),0)
+    z = estimate_slope(z)
+    
+    kernel_size = 45
+    kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size * kernel_size)
+    z = cv2.filter2D(z, -1, kernel)
+    # z = cv2.GaussianBlur(z, (45,45),0)
     z = cv2.resize(z, dsize=(576,384), interpolation=cv2.INTER_AREA)
 
 
@@ -170,7 +174,8 @@ def main():
 
     ax.set_xlim(0, img_w)
     ax.set_ylim(0, img_h)
-    ax.set_zlim(0, np.max(z))
+    ax.set_zlim(0, 90)
+    # ax.set_zlim(0, np.max(z))
     # ax.set_zlim(0, 150)
 
     plt.show()

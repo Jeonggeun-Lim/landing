@@ -94,21 +94,21 @@ def correct_image(blur, slope_range):
     height, width = blur[slope_range[0]:slope_range[1], :].shape  # y, x
     blur = blur[slope_range[0]:slope_range[1], :]
 
-    # 10 height
-    for x in range(height):
-        for y in range(width):
-            blur[x][y] = blur[x][y] - int(35 - x * 35/576)
-            if (blur[x][y] > 150):
-                blur[x][y] = 0
-            print(blur[x][y])
-            
-    # # 20, 30 height
+    # # 10 height
     # for x in range(height):
     #     for y in range(width):
-    #         blur[x][y] = blur[x][y] - int(25 - y * 25/576)
+    #         blur[x][y] = blur[x][y] - int(25 - x * 25/576)
     #         if (blur[x][y] > 150):
     #             blur[x][y] = 0
     #         print(blur[x][y])
+            
+    # 20, 30 height
+    for x in range(height):
+        for y in range(width):
+            blur[x][y] = blur[x][y] - int(25 - y * 25/576)
+            if (blur[x][y] > 150):
+                blur[x][y] = 0
+            print(blur[x][y])
 
     return blur
 
@@ -138,15 +138,16 @@ def estimate_slope(z):
 
 def main():
 
-    vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
-    slope_range = (50, 230)   # 10 deg
+    # vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
+    # slope_range = (50, 230)   # 10 deg
     # vor_image_gray = cv2.imread('images_20/voro_lidar_img_2023_09_16_06_54_29_02000.jpg', 0).astype(np.uint8)   # 20 deg
     # slope_range = (0, 200)   # 20 deg
-    # vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
-    # slope_range = (50, 200)   # 30 deg
+    vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
+    slope_range = (50, 200)   # 30 deg
     # vor_image_gray = vor_image_gray[0:400][:]
     # vor_image_gray = vor_image_gray[0:400, 0:400]
     vor_image_gray = vor_image_gray[0:300, 0:450]
+    # vor_image_gray = vor_image_gray[0:120, 0:180]
 
     # img_h, img_w = vor_image_gray.shape
     # for y in range(img_h):
@@ -155,7 +156,7 @@ def main():
 
     blur = cv2.GaussianBlur(vor_image_gray, (45,45), 0)
     z = correct_image(blur, slope_range)
-    z = estimate_slope(z)
+    # z = estimate_slope(z)
 
     kernel_size = 45
     kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size * kernel_size)
@@ -164,7 +165,7 @@ def main():
     # z = cv2.resize(z, dsize=(576,384), interpolation=cv2.INTER_AREA)
     # scale = 1 / 19.2
     # z = cv2.resize(z * scale, dsize=(576 * scale, 384 * scale), interpolation=cv2.INTER_AREA)
-    # z = cv2.resize(z * scale, dsize=(30, 20), interpolation=cv2.INTER_AREA)
+    z = cv2.resize(z, dsize=(180, 120), interpolation=cv2.INTER_AREA)
 
 
     fig = plt.figure()
@@ -174,29 +175,34 @@ def main():
     # ax.set_aspect("equal")
 
     img_h, img_w = z.shape
-    x = np.arange(0, img_w, 1)
-    y = np.arange(0, img_h, 1)
+    x = np.arange(0, img_w, 1) / 100
+    y = np.arange(0, img_h, 1) / 100
     x, y = np.meshgrid(x, y)
 
     # np.savetxt('slope.txt', blur[1][y], fmt='%d', delimiter='/t')
     # z = cv2.GaussianBlur(vor_image_gray,(45,45),0)
 
-    ax.plot_surface(x, y, z, cmap='gray')
+    ax.plot_surface(x, y, z / 2.5 / 100, cmap='gray')  # height
+    # ax.plot_surface(x, y, z, cmap='gray')  # slope
     # ax.set_xlabel('X Label')
     # ax.set_ylabel('Y Label')
-    # ax.set_zlabel('Slope') 
+    # ax.set_zlabel('Slope')
 
 
-    plt.rc('font', size=15)
-    ax.set_xlim(0, img_w)
-    ax.set_ylim(0, img_h)
-    ax.set_zlim(0, 90)
+    plt.rc('font', size=20)
+    ax.set_xlim(0, img_w / 100)
+    ax.set_ylim(0, img_h / 100)
+    ax.set_zlim(0, 90 / 100)  # height
+    # ax.set_zlim(0, 90)  # slope
     plt.grid(True, linestyle='--', alpha=0.7)
+    
+    # plt.tick_params(axis='both', labelsize=20)
+    
     # ax.set_zlim(0, 90 * scale)
     # ax.set_zlim(0, np.max(z))
     # ax.set_zlim(0, 150)   # 10, 20, 30 height
 
-    
+    ax.view_init(elev=30, azim=50)
     plt.show()
 
     cv2.waitKey(0)

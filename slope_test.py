@@ -175,14 +175,14 @@ def main():
     # ax.set_aspect("equal")
 
     img_h, img_w = z.shape
-    x = np.arange(0, img_w, 1) / 100
-    y = np.arange(0, img_h, 1) / 100
+    x = np.arange(0, img_w, 1) / 1
+    y = np.arange(0, img_h, 1) / 1
     x, y = np.meshgrid(x, y)
 
     # np.savetxt('slope.txt', blur[1][y], fmt='%d', delimiter='/t')
     # z = cv2.GaussianBlur(vor_image_gray,(45,45),0)
 
-    ax.plot_surface(x, y, z / 2.5 / 100, cmap='gray')  # height
+    ax.plot_surface(x, y, z / 2.5 / 1, cmap='gray')  # height
     # ax.plot_surface(x, y, z, cmap='gray')  # slope
     # ax.set_xlabel('X Label')
     # ax.set_ylabel('Y Label')
@@ -190,9 +190,9 @@ def main():
 
 
     plt.rc('font', size=20)
-    ax.set_xlim(0, img_w / 100)
-    ax.set_ylim(0, img_h / 100)
-    ax.set_zlim(0, 90 / 100)  # height
+    ax.set_xlim(0, img_w / 1)
+    ax.set_ylim(0, img_h / 1)
+    ax.set_zlim(0, 90 / 1)  # height
     # ax.set_zlim(0, 90)  # slope
     plt.grid(True, linestyle='--', alpha=0.7)
     

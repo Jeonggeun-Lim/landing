@@ -46,8 +46,7 @@ def convolve(image, kernel, scale):
 
             # slope = int((slope1+slope3)/2)
             slope = int((slope1+slope2+slope3+slope4)/4)
-            image_decreased_2[(y-pad)//stride-1, (x-pad)//stride - 1] = slope + 2
-
+            image_decreased_2[(y-pad)//stride-1, (x-pad)//stride - 1] = slope
             # image_decreased_2[y//2-pad,x//2-pad] = slope
             # image_decreased_2[int((y-pad)//2-pad//2),int((x-pad)//2-pad//2)] = slope
 
@@ -94,13 +93,13 @@ def correct_image(blur, slope_range):
     height, width = blur[slope_range[0]:slope_range[1], :].shape  # y, x
     blur = blur[slope_range[0]:slope_range[1], :]
 
-    # # 10 height
-    # for x in range(height):
-    #     for y in range(width):
-    #         blur[x][y] = blur[x][y] - int(25 - x * 25/576)
-    #         if (blur[x][y] > 150):
-    #             blur[x][y] = 0
-    #         print(blur[x][y])
+    # 10 height
+    for x in range(height):
+        for y in range(width):
+            blur[x][y] = blur[x][y] - int(35 - x * 35/576)
+            if (blur[x][y] > 150):
+                blur[x][y] = 0
+            print(blur[x][y])
             
     # # 20, 30 height
     # for x in range(height):
@@ -138,12 +137,12 @@ def estimate_slope(z):
 
 def main():
 
-    # vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
-    # slope_range = (50, 230)   # 10 deg
+    vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
+    slope_range = (50, 230)   # 10 deg
     # vor_image_gray = cv2.imread('images_20/voro_lidar_img_2023_09_16_06_54_29_02000.jpg', 0).astype(np.uint8)   # 20 deg
     # slope_range = (0, 200)   # 20 deg
-    vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
-    slope_range = (50, 200)   # 30 deg
+    # vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
+    # slope_range = (50, 200)   # 30 deg
     # vor_image_gray = vor_image_gray[0:400][:]
     # vor_image_gray = vor_image_gray[0:400, 0:400]
     vor_image_gray = vor_image_gray[0:300, 0:450]
@@ -182,8 +181,8 @@ def main():
     # np.savetxt('slope.txt', blur[1][y], fmt='%d', delimiter='/t')
     # z = cv2.GaussianBlur(vor_image_gray,(45,45),0)
 
-    ax.plot_surface(x, y, z / 2.5 / 1, cmap='gray')  # height
-    # ax.plot_surface(x, y, z, cmap='gray')  # slope
+    # ax.plot_surface(x, y, z / 2.5 / 1, cmap='gray')  # height
+    ax.plot_surface(x, y, z, cmap='gray')  # slope
     # ax.set_xlabel('X Label')
     # ax.set_ylabel('Y Label')
     # ax.set_zlabel('Slope')
@@ -193,7 +192,7 @@ def main():
     ax.set_xlim(0, img_w / 1)
     ax.set_ylim(0, img_h / 1)
     # ax.set_zlim(0, 90 / 1)  # height
-    ax.set_zlim(0, 90 / 2)  # slope
+    ax.set_zlim(0, 90)  # slope
     plt.grid(True, linestyle='--', alpha=0.7)
     
     # plt.tick_params(axis='both', labelsize=20)

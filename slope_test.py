@@ -46,7 +46,7 @@ def convolve(image, kernel, scale):
 
             # slope = int((slope1+slope3)/2)
             slope = int((slope1+slope2+slope3+slope4)/4)
-            image_decreased_2[(y-pad)//stride-1, (x-pad)//stride - 1] = slope
+            image_decreased_2[(y-pad)//stride-1, (x-pad)//stride - 1] = slope + 2
 
             # image_decreased_2[y//2-pad,x//2-pad] = slope
             # image_decreased_2[int((y-pad)//2-pad//2),int((x-pad)//2-pad//2)] = slope
@@ -102,13 +102,13 @@ def correct_image(blur, slope_range):
     #             blur[x][y] = 0
     #         print(blur[x][y])
             
-    # 20, 30 height
-    for x in range(height):
-        for y in range(width):
-            blur[x][y] = blur[x][y] - int(25 - y * 25/576)
-            if (blur[x][y] > 150):
-                blur[x][y] = 0
-            print(blur[x][y])
+    # # 20, 30 height
+    # for x in range(height):
+    #     for y in range(width):
+    #         blur[x][y] = blur[x][y] - int(25 - y * 25/576)
+    #         if (blur[x][y] > 150):
+    #             blur[x][y] = 0
+    #         print(blur[x][y])
 
     return blur
 
@@ -156,7 +156,7 @@ def main():
 
     blur = cv2.GaussianBlur(vor_image_gray, (45,45), 0)
     z = correct_image(blur, slope_range)
-    # z = estimate_slope(z)
+    z = estimate_slope(z)
 
     kernel_size = 45
     kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size * kernel_size)
@@ -192,8 +192,8 @@ def main():
     plt.rc('font', size=20)
     ax.set_xlim(0, img_w / 1)
     ax.set_ylim(0, img_h / 1)
-    ax.set_zlim(0, 90 / 1)  # height
-    # ax.set_zlim(0, 90)  # slope
+    # ax.set_zlim(0, 90 / 1)  # height
+    ax.set_zlim(0, 90 / 2)  # slope
     plt.grid(True, linestyle='--', alpha=0.7)
     
     # plt.tick_params(axis='both', labelsize=20)

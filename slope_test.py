@@ -165,7 +165,7 @@ def main():
     # z = cv2.resize(z, dsize=(576,384), interpolation=cv2.INTER_AREA)
     # scale = 1 / 19.2
     # z = cv2.resize(z * scale, dsize=(576 * scale, 384 * scale), interpolation=cv2.INTER_AREA)
-    z = cv2.resize(z, dsize=(180, 120), interpolation=cv2.INTER_AREA)
+    # z = cv2.resize(z, dsize=(180, 120), interpolation=cv2.INTER_AREA)
 
 
     fig = plt.figure()

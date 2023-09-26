@@ -46,7 +46,7 @@ def convolve(image, kernel, scale):
 
             # slope = int((slope1+slope3)/2)
             slope = int((slope1+slope2+slope3+slope4)/4)
-            image_decreased_2[(y-pad)//stride-1, (x-pad)//stride - 1] = slope
+            image_decreased_2[(y-pad)//stride-1, (x-pad)//stride - 1] = slope + 7
             # image_decreased_2[y//2-pad,x//2-pad] = slope
             # image_decreased_2[int((y-pad)//2-pad//2),int((x-pad)//2-pad//2)] = slope
 
@@ -93,21 +93,21 @@ def correct_image(blur, slope_range):
     height, width = blur[slope_range[0]:slope_range[1], :].shape  # y, x
     blur = blur[slope_range[0]:slope_range[1], :]
 
-    # 10 height
-    for x in range(height):
-        for y in range(width):
-            blur[x][y] = blur[x][y] - int(35 - x * 35/576)
-            if (blur[x][y] > 150):
-                blur[x][y] = 0
-            print(blur[x][y])
-            
-    # # 20, 30 height
+    # # 10 height
     # for x in range(height):
     #     for y in range(width):
-    #         blur[x][y] = blur[x][y] - int(25 - y * 25/576)
+    #         blur[x][y] = blur[x][y] - int(35 - x * 35/576)
     #         if (blur[x][y] > 150):
     #             blur[x][y] = 0
     #         print(blur[x][y])
+            
+    # 20, 30 height
+    for x in range(height):
+        for y in range(width):
+            blur[x][y] = blur[x][y] - int(35 - y * 35/576)
+            if (blur[x][y] > 150):
+                blur[x][y] = 0
+            print(blur[x][y])
 
     return blur
 
@@ -137,12 +137,12 @@ def estimate_slope(z):
 
 def main():
 
-    vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
-    slope_range = (50, 230)   # 10 deg
+    # vor_image_gray = cv2.imread('images_10/voro_lidar_img_2023_09_16_06_41_42_01800.jpg', 0).astype(np.uint8)   # 10 deg
+    # slope_range = (50, 230)   # 10 deg
     # vor_image_gray = cv2.imread('images_20/voro_lidar_img_2023_09_16_06_54_29_02000.jpg', 0).astype(np.uint8)   # 20 deg
     # slope_range = (0, 200)   # 20 deg
-    # vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
-    # slope_range = (50, 200)   # 30 deg
+    vor_image_gray = cv2.imread('images_30/voro_lidar_img_2023_09_16_07_04_35_02300.jpg', 0).astype(np.uint8)   # 30 deg
+    slope_range = (50, 200)   # 30 deg
     # vor_image_gray = vor_image_gray[0:400][:]
     # vor_image_gray = vor_image_gray[0:400, 0:400]
     vor_image_gray = vor_image_gray[0:300, 0:450]
